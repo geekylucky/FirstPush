@@ -1,40 +1,50 @@
-const inputdabba = document.getElementById("inputdabba");
-const listContainer = document.getElementById("list-container");
-function addTask() {
-    if (inputdabba.value === ''){
-        alert("You must write something.")
-    }
-    else{
-        let li = document.createElement("li");
-        li.innerHTML = inputdabba.value;
-        listContainer.appendChild(li);
-        let span = document.createElement("span");
-        span.innerHTML = "\u00d7";
-        li.appendChild(span);
+const addbtn = document.querySelector("#addbtn");
+const main = document.querySelector("#main");
 
-    }
+const saveNotes = () => {
+  const notes = document.querySelectorAll(".note textarea");
+  const data = [];
+  notes.forEach((note) => {
+    data.push(note.value);
+  });
 
-    inputdabba.value = "";
-    saveData();
-}
+  localStorage.setItem("notes", JSON.stringify(data));
+};
 
-listContainer.addEventListener("click",function(e){
-    if (e.target.tagName == "LI"){
-        e.target.classList.toggle("checked");
-        saveData();
-    }
-    else if(e.target.tagName === "SPAN"){
-        e.target.parentElement.remove();
-        saveData();
-    }
-},false);
+const addnote = (text = "") => {
+  const note = document.createElement("div");
+  note.classList.add("note");
+  note.innerHTML = `
+        <div class="tool">
+            <i class="save fa-solid fa-floppy-disk" style="color: #63E6BE;"></i>
+            <i class="trash fa-solid fa-trash" style="color: #63E6BE;"></i>
+        </div>
+        <textarea>${text}</textarea>
+    `;
 
-function saveData() {
-    localStorage.setItem("data",listContainer.innerHTML);
-}
+  note.querySelector(".trash").addEventListener("click", function () {
+    note.remove();
+    saveNotes();
+  });
 
-function showTask() {
-    listContainer.innerHTML = localStorage.getItem("data");
-}
+  note.querySelector(".save").addEventListener("click", function () {
+    saveNotes();
+  });
 
-showTask();
+  note.querySelector("textarea").addEventListener("input", saveNotes);
+
+  main.appendChild(note);
+};
+
+const loadNotes = () => {
+  const savedNotes = JSON.parse(localStorage.getItem("notes")) || [];
+  savedNotes.forEach((note) => {
+    addnote(note);
+  });
+};
+
+addbtn.addEventListener("click", function () {
+  addnote();
+});
+
+loadNotes();
